@@ -2,7 +2,7 @@ import gradio as gr
 from transformers import pipeline
 
 print("Loading model... please wait ⏳")
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn", framework="pt")
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", framework="pt")
 print("Model loaded! ✅")
 
 def summarize_text(text):
