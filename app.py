@@ -305,4 +305,4 @@ with gr.Blocks(css=custom_css, title="AI Text Summarizer") as demo:
     submit_btn.click(fn=summarize_text, inputs=input_box, outputs=output_box)
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch()
