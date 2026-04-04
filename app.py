@@ -1,8 +1,10 @@
+import os
+os.environ["TRANSFORMERS_CACHE"] = "/tmp/transformers_cache"
 import gradio as gr
 from transformers import pipeline
 
 print("Loading model... please wait ⏳")
-summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", framework="pt")
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn", framework="pt", device=-1)
 print("Model loaded! ✅")
 
 def summarize_text(text):
