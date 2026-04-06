@@ -1,0 +1,54 @@
+name: email-triage-env
+version: "1.0.0"
+description: >
+  A real-world email triage simulation environment where AI agents must
+  classify, route, and reply to emails. Built for the Meta x PyTorch x
+  Hugging Face x Scaler Hackathon.
+
+author: ambrish17
+tags:
+  - openenv
+  - email
+  - nlp
+  - triage
+  - real-world
+
+tasks:
+  - name: email_classify
+    difficulty: easy
+    description: Classify email priority as urgent, normal, or low
+    max_steps: 3
+    reward_range: [0.0, 1.0]
+
+  - name: email_route
+    difficulty: medium
+    description: Route email to correct department
+    max_steps: 3
+    reward_range: [0.0, 1.0]
+
+  - name: email_reply
+    difficulty: hard
+    description: Draft a professional reply to the email
+    max_steps: 5
+    reward_range: [0.0, 1.0]
+
+observation_space:
+  email_id: string
+  subject: string
+  body: string
+  sender: string
+  task: string
+  instruction: string
+  current_step: integer
+  max_steps: integer
+  done: boolean
+
+action_space:
+  action: string
+
+endpoints:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
+  tasks: GET /tasks
+  health: GET /health
