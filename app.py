@@ -1,151 +1,79 @@
-"""
-Email Triage Environment — FastAPI Server
-==========================================
-Exposes OpenEnv-compliant endpoints:
-  POST /reset   — reset the environment
-  POST /step    — take an action
-  GET  /state   — get current state
-  GET  /tasks   — list all tasks
-  GET  /health  — health check
-"""
-
 import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
+from typing import Dict, Any
+from email_triage_env import EmailTriageEnv
 
-from email_triage_env import (
-    EmailTriageEnv,
-    EmailTriageAction,
-    EmailTriageObservation,
-    EmailTriageState,
-)
-
+# 1. Initialize FastAPI with metadata for OpenEnv compliance
 app = FastAPI(
     title="Email Triage Environment",
-    description="OpenEnv-compliant email triage simulation for AI agents.",
+    description="An environment for classifying, routing, and replying to emails.",
     version="1.0.0"
 )
 
-# Global env instance per task
-envs = {}
-current_task = "email_classify"
-
-
-# ─── Request Models ──────────────────────────────────────────────────────────
+env = EmailTriageEnv()
 
 class ResetRequest(BaseModel):
-    task: str = "email_classify"
-
+    task: str
 
 class StepRequest(BaseModel):
     action: str
 
-
-# ─── Endpoints ───────────────────────────────────────────────────────────────
-
-@app.get("/")
-async def root():
-    return {
-        "name": "Email Triage Environment",
-        "version": "1.0.0",
-        "tasks": ["email_classify", "email_route", "email_reply"],
-        "status": "running"
-    }
-
+# --- Mandatory OpenEnv Endpoints ---
 
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-
-@app.get("/tasks")
-async def list_tasks():
+@app.get("/metadata")
+async def get_metadata():
     return {
-        "tasks": [
-            {
-                "name": "email_classify",
-                "difficulty": "easy",
-                "description": "Classify email priority as urgent, normal, or low"
-            },
-            {
-                "name": "email_route",
-                "difficulty": "medium",
-                "description": "Route email to correct department: engineering, finance, hr, sales, or support"
-            },
-            {
-                "name": "email_reply",
-                "difficulty": "hard",
-                "description": "Draft a professional reply to the email"
-            }
-        ]
+        "name": "email_triage_env",
+        "description": "A real-world simulation of an email inbox triage system.",
+        "version": "1.0.0"
     }
 
+@app.get("/schema")
+async def get_schema():
+    return {
+        "action": {"type": "string", "description": "The agent's decision or text response"},
+        "observation": {
+            "type": "object",
+            "properties": {
+                "email_id": {"type": "string"},
+                "subject": {"type": "string"}
+            }
+        },
+        "state": {"type": "object", "description": "Current internal state"}
+    }
+
+@app.post("/mcp")
+async def mcp_endpoint(payload: Dict[str, Any]):
+    return {
+        "jsonrpc": "2.0",
+        "id": payload.get("id"),
+        "result": {"status": "connected"}
+    }
+
+# --- Core Functional Endpoints ---
 
 @app.post("/reset")
-async def reset(body: ResetRequest = None):
-    """Reset the environment for a given task."""
-    global current_task
-
-    task = "email_classify"
-    if body and body.task:
-        task = body.task
-
-    if task not in ["email_classify", "email_route", "email_reply"]:
-        raise HTTPException(status_code=400, detail=f"Unknown task: {task}")
-
-    current_task = task
-    env = EmailTriageEnv(task=task)
-    envs[task] = env
-
-    obs = await env.reset()
-    return {
-        "status": "ok",
-        "task": task,
-        "observation": obs.dict()
-    }
-
+async def reset(request: ResetRequest):
+    try:
+        observation = await env.reset(task=request.task)
+        return {"status": "ok", "task": request.task, "observation": observation}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/step")
-async def step(body: StepRequest):
-    """Take a step in the current environment."""
-    global current_task
-
-    if current_task not in envs:
-        raise HTTPException(status_code=400, detail="Environment not initialized. Call /reset first.")
-
-    env = envs[current_task]
-    action = EmailTriageAction(action=body.action)
-
-    obs, reward, done, info = await env.step(action)
-
-    return {
-        "observation": obs.dict(),
-        "reward": reward,
-        "done": done,
-        "info": info
-    }
-
-
-@app.get("/state")
-async def state():
-    """Get current environment state."""
-    global current_task
-
-    if current_task not in envs:
-        return {
-            "task": current_task,
-            "status": "not_initialized",
-            "message": "Call /reset to initialize"
-        }
-
-    env = envs[current_task]
-    s = await env.state()
-    return s.dict()
-
-
-# ─── Run ─────────────────────────────────────────────────────────────────────
+async def step(request: StepRequest):
+    try:
+        reward, done, observation = await env.step(request.action)
+        return {"reward": reward, "done": done, "observation": observation}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 7860))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    import uvicorn
+    # Port 7860 and Host 0.0.0.0 are MANDATORY for Hugging Face Spaces
+    uvicorn.run(app, host="0.0.0.0", port=7860)
