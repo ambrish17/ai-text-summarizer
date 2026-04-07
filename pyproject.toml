@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "email-triage-env"
+version = "0.1.0"
+description = "OpenEnv Email Triage Environment for Meta Hackathon"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "openai",
+    "pydantic",
+    "python-multipart",
+    "httpx"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
