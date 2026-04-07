@@ -2,19 +2,24 @@ import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
-# Ensure your environment logic is imported correctly
 from email_triage_env import EmailTriageEnv
 
-# OpenEnv Versioning: Title and version are mandatory for OpenAPI validation
+# Mandatory: title and version for openapi_version_available check
 app = FastAPI(
     title="Email Triage Environment",
-    description="A real-world simulation for agentic email triage tasks.",
+    description="A real-world simulation of an email inbox triage system.",
     version="1.0.0"
 )
 
 env = EmailTriageEnv()
 
-# --- OpenEnv Required Endpoints ---
+class ResetRequest(BaseModel):
+    task: str
+
+class StepRequest(BaseModel):
+    action: str
+
+# --- Mandatory OpenEnv Standard Endpoints ---
 
 @app.get("/health")
 async def health():
@@ -22,29 +27,16 @@ async def health():
 
 @app.get("/metadata")
 async def get_metadata():
-    """Satisfies metadata_endpoint check"""
     return {
         "name": "email_triage_env",
-        "description": "Agents learn to prioritize, categorize, and route emails.",
+        "description": "An environment for agentic email triage tasks including classification and routing.",
         "version": "1.0.0"
     }
-@app.get("/state")
-async def get_state():
-    """
-    Mandatory endpoint for OpenEnv simulation mode.
-    Returns the current internal state of the environment.
-    """
-    try:
-        # Calls the get_state method from your email_triage_env.py
-        state = env.get_state()
-        return state
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve state: {str(e)}")
+
 @app.get("/schema")
 async def get_schema():
-    """Satisfies schema_endpoint check"""
     return {
-        "action": {"type": "string", "description": "Category or department name"},
+        "action": {"type": "string", "description": "The agent's decision"},
         "observation": {
             "type": "object",
             "properties": {
@@ -52,33 +44,41 @@ async def get_schema():
                 "subject": {"type": "string"}
             }
         },
-        "state": {"type": "object", "description": "Current environment state"}
+        "state": {"type": "object", "description": "Current task state"}
     }
 
 @app.post("/mcp")
 async def mcp_endpoint(payload: Dict[str, Any]):
-    """Satisfies mcp_endpoint check (JSON-RPC)"""
     return {
         "jsonrpc": "2.0",
         "id": payload.get("id", 1),
-        "result": {"status": "connected", "capabilities": {}}
+        "result": {"status": "connected"}
     }
 
-# --- Functional Endpoints ---
+@app.get("/state")
+async def get_state_endpoint():
+    # Satisfies mode_endpoint_consistency check
+    return env.get_state()
+
+# --- Core Task Endpoints ---
 
 @app.post("/reset")
-async def reset(request: Dict[str, str]):
-    task = request.get("task", "email_classify")
-    observation = await env.reset(task=task)
-    return {"status": "ok", "task": task, "observation": observation}
+async def reset(request: ResetRequest):
+    try:
+        observation = await env.reset(task=request.task)
+        return {"status": "ok", "task": request.task, "observation": observation}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/step")
-async def step(request: Dict[str, str]):
-    action = request.get("action")
-    reward, done, observation = await env.step(action)
-    return {"reward": reward, "done": done, "observation": observation}
+async def step(request: StepRequest):
+    try:
+        reward, done, observation = await env.step(request.action)
+        return {"reward": reward, "done": done, "observation": observation}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    # Hugging Face MUST use 0.0.0.0 and port 7860
+    # 0.0.0.0 and 7860 are mandatory for Hugging Face Spaces
     uvicorn.run(app, host="0.0.0.0", port=7860)
