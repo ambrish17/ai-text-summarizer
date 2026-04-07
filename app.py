@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Optional, Dict, Any
 from email_triage_env import EmailTriageEnv
 
 # Mandatory: title and version for openapi_version_available check
@@ -14,7 +14,7 @@ app = FastAPI(
 env = EmailTriageEnv()
 
 class ResetRequest(BaseModel):
-    task: str
+    task: Optional[str] = "email_classify"
 
 class StepRequest(BaseModel):
     action: str
@@ -64,20 +64,23 @@ async def get_state_endpoint():
 
 # Change your reset endpoint to this more flexible version:
 @app.post("/reset")
-async def reset(request: Optional[Dict[str, Any]] = None):
+async def reset(request: Optional[ResetRequest] = None):
     try:
-        # Default to 'email_classify' if no task is provided in the body
+        # Determine the task: use the request body if it exists,
+        # otherwise default to your first task
         task = "email_classify"
-        if request and "task" in request:
-            task = request["task"]
+        if request and request.task:
+            task = request.task
 
         observation = await env.reset(task=task)
+
         return {
             "status": "ok",
             "task": task,
             "observation": observation
         }
     except Exception as e:
+        print(f"Reset failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/step")
