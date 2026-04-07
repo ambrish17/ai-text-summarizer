@@ -62,13 +62,23 @@ async def get_state_endpoint():
 
 # --- Core Task Endpoints ---
 
+# Change your reset endpoint to this more flexible version:
 @app.post("/reset")
-async def reset(request: ResetRequest):
+async def reset(request: Optional[Dict[str, Any]] = None):
     try:
-        observation = await env.reset(task=request.task)
-        return {"status": "ok", "task": request.task, "observation": observation}
+        # Default to 'email_classify' if no task is provided in the body
+        task = "email_classify"
+        if request and "task" in request:
+            task = request["task"]
+
+        observation = await env.reset(task=task)
+        return {
+            "status": "ok",
+            "task": task,
+            "observation": observation
+        }
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/step")
 async def step(request: StepRequest):
