@@ -91,7 +91,9 @@ async def step(request: StepRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+def main():
+    port = int(os.getenv("PORT", 7860))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
 if __name__ == "__main__":
-    import uvicorn
-    # 0.0.0.0 and 7860 are mandatory for Hugging Face Spaces
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+    main()
