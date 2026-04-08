@@ -80,14 +80,14 @@ def grade(task: str, action: str, email: dict) -> float:
     correct = email["correct_answer"]
     keywords = email["keywords"]
     if correct in action_lower:
-        return 1.0
+        return 0.95
     matches = sum(1 for kw in keywords if kw in action_lower)
     if task == "email_reply":
         length_score = min(len(action_lower) / 200, 0.3)
-        return min(length_score + matches * 0.2, 1.0)
+        return min(max(length_score + matches * 0.2, 0.01), 0.95)
     if matches > 0:
-        return min(0.4 + matches * 0.15, 0.85)
-    return 0.0
+        return min(0.4 + matches * 0.15, 0.90)
+    return 0.05
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 
@@ -175,7 +175,7 @@ async def run_task(client: OpenAI, task: str) -> float:
             history.append(f"Step {step}: {action_text!r} -> reward {reward:.2f}")
 
         score = sum(rewards) / len(rewards) if rewards else 0.0
-        score = min(max(score, 0.0), 1.0)
+        score = min(max(score, 0.01), 0.99)
         success = score >= SUCCESS_THRESHOLD
 
     except Exception as e:
