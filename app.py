@@ -3,12 +3,27 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from email_triage_env import EmailTriageEnv
+import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 # Mandatory: title and version for openapi_version_available check
 app = FastAPI(
     title="Email Triage Environment",
     description="A real-world simulation of an email inbox triage system.",
     version="1.0.0"
+)
+
+# Enable CORS for the frontend (Vite dev server)
+_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 env = EmailTriageEnv()
