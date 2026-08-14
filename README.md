@@ -1,6 +1,6 @@
 ---
-title: Email Triage Environment
-emoji: 🧠
+title: E-Commerce Full Stack Project
+emoji: 🛒
 colorFrom: indigo
 colorTo: blue
 sdk: docker
@@ -9,46 +9,66 @@ python_version: "3.10"
 pinned: false
 ---
 
-# 📧 Email Triage Environment
+# 🛒 E-Commerce Full Stack Project
 
-An OpenEnv-compliant real-world simulation designed for training and evaluating AI agents in automated email management. Built for the **Meta × PyTorch × Hugging Face × Scaler Hackathon**.
+A comprehensive full-stack e-commerce website designed for seamless online shopping experiences. Built with modern web technologies, this project demonstrates complete integration of frontend, backend, and database systems.
 
 ## 📝 Description & Motivation
-In professional settings, email management is a high-volume, repetitive task that requires nuance. This environment simulates a corporate inbox where an agent must act as a first-responder triage system.
 
-The goal is to move beyond simple "chat" and evaluate an agent's ability to perform **deterministic actions** (categorizing, routing, and drafting) that integrate with business workflows.
+The e-commerce platform provides a complete solution for online retail businesses. It includes product catalog management, shopping cart functionality, user authentication, secure payment processing, and order management. The system is designed to handle high-volume transactions while maintaining data integrity and user experience.
 
----
-
-## 👁️ Observation Space
-The environment provides a structured JSON observation containing:
-* `email_id`: Unique identifier for the current session.
-* `subject`: The email's subject line.
-* `body`: The full text content of the email.
-* `sender`: The originator's email address.
-* `task`: The current sub-task (classify, route, or reply).
-
-## ⚡ Action Space
-The agent responds with a single string representing its decision:
-* **Classify:** `["urgent", "normal", "low"]`
-* **Route:** `["engineering", "hr", "finance", "sales", "support"]`
-* **Reply:** A professional text string draft.
+The goal is to create a production-ready e-commerce platform that demonstrates best practices in full-stack web development, including responsive UI, robust backend APIs, database optimization, and secure payment integration.
 
 ---
 
-## 🎯 Task Descriptions & Difficulty
-| Task | Difficulty | Description |
+## 👁️ Features
+
+The e-commerce platform includes:
+
+* **User Management**: User registration, authentication, and profile management
+* **Product Catalog**: Browse, search, and filter products with detailed descriptions
+* **Shopping Cart**: Add/remove items, update quantities, and view cart totals
+* **Checkout System**: Multi-step checkout with address and payment information
+* **Payment Integration**: Secure payment processing
+* **Order Management**: Order history, tracking, and status updates
+* **Admin Dashboard**: Manage products, inventory, orders, and users
+* **Reviews & Ratings**: User feedback system for products
+
+---
+
+## 🏗️ Architecture
+
+### Frontend
+* Responsive web interface built with modern frameworks
+* Interactive UI for product browsing and checkout
+* Real-time cart updates and order tracking
+
+### Backend
+* RESTful API for all e-commerce operations
+* User authentication and authorization
+* Order processing and inventory management
+* Payment gateway integration
+
+### Database
+* Product catalog storage
+* User accounts and authentication data
+* Order and transaction records
+* Inventory tracking
+
+---
+
+## 🎯 Core Functionalities
+
+| Feature | Description | Priority |
 | :--- | :--- | :--- |
-| **email_classify** | Easy | Identifying the priority level based on sentiment and keywords. |
-| **email_route** | Medium | Determining the correct department based on technical or administrative context. |
-| **email_reply** | Hard | Generating a contextually aware, professional response that addresses the user's specific query. |
-
----
-
-## 🏆 Reward Logic
-* **Deterministic Match:** 1.0 reward for exact category matches in classification and routing.
-* **Partial Credit:** 0.4 - 0.8 reward for routing to "related" departments.
-* **Semantic Quality:** For replies, rewards are calculated based on a combination of length, professional greeting, and keyword coverage (0.0 - 1.0).
+| **Product Management** | Add, update, and delete products with images and descriptions | High |
+| **Shopping Cart** | Persistent cart with quantity management | High |
+| **Checkout Process** | Secure multi-step checkout with validation | High |
+| **Payment Processing** | Integrated payment gateway for transactions | High |
+| **User Authentication** | Secure login and registration system | High |
+| **Order Tracking** | Real-time order status and delivery tracking | Medium |
+| **Admin Panel** | Dashboard for store management and analytics | Medium |
+| **Product Reviews** | User ratings and reviews system | Medium |
 
 ---
 
@@ -56,6 +76,87 @@ The agent responds with a single string representing its decision:
 
 ### Local Development
 ```bash
-git clone [https://github.com/ambrish17/ai-text-summarizer](https://github.com/ambrish17/ai-text-summarizer)
+git clone https://github.com/ambrish17/ai-text-summarizer
 pip install -r requirements.txt
 python app.py
+```
+
+### Requirements
+- Python 3.10+
+- Database: PostgreSQL/MongoDB
+- Payment Gateway: Stripe/PayPal API keys
+- Frontend framework (React/Vue/Angular)
+
+### Environment Variables
+```
+DATABASE_URL=your_database_url
+PAYMENT_API_KEY=your_payment_key
+SECRET_KEY=your_secret_key
+```
+
+---
+
+## 📦 Project Structure
+
+```
+ai-text-summarizer/
+├── backend/
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── models/
+│   ├── routes/
+│   └── utils/
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── database/
+│   └── migrations/
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## 🔒 Security Features
+
+* Password hashing and secure authentication
+* HTTPS/SSL encryption for data in transit
+* SQL injection prevention through parameterized queries
+* CSRF protection on all forms
+* PCI compliance for payment processing
+
+---
+
+## 📊 Database Schema
+
+The system includes tables for:
+- Users (authentication & profiles)
+- Products (catalog & inventory)
+- Orders (transactions & tracking)
+- Order Items (line items)
+- Reviews & Ratings
+- Payments (transaction records)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+---
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+---
+
+## 📧 Contact & Support
+
+For support and inquiries, please open an issue or contact the project maintainer.
